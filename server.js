@@ -2,6 +2,7 @@ const express = require('express');
 const app = express();
 const mongo = require('mongodb').MongoClient
 const url = 'mongodb://localhost:27017'
+import { getScrapedData } from './scrape.js'
 
 /**
  * API to scrape the data from the given link
@@ -15,26 +16,22 @@ app.get('/scrape', (req, res) => {
       console.error(err)
       res.send({msg: "Cannot connect to db"});
     }
-    // using a child process to run the crawling scrip written in python
-    const spawn = require("child_process").spawn; 
-    const process = spawn('python',["./scrape.py"]);
+    // fetching the data from the output of the scrape script.
+    data = getScrapedData();
 
-    //fetching the data from the output of the python script.
-    process.stdout.on('data', function(data) {
-      // Note: assumption the db and the collection exist.
-      // connectiong to  `repo` db and collection `repoList`.
-      const db = client.db('repo');
-      const collection = db.collection('repoList');
+    // Note: assumption the db and the collection exist.
+    // connectiong to  `repo` db and collection `repoList`.
+    const db = client.db('repo');
+    const collection = db.collection('repoList');
 
-      // inserting a list of results together.
-      collection.insertMany(data, (err, result) => {
-        if (err) {
-          console.error(err);
-          res.send({msg: "error in inserting the data", status: 304});
-        }
-        res.send({msg: "Data Scraped and Stored in Mongo DB", status: 201});
-      })
-    });
+    // inserting a list of results together.
+    collection.insertMany(data, (err, result) => {
+      if (err) {
+        console.error(err);
+        res.send({msg: "error in inserting the data", status: 304});
+      }
+      res.send({msg: "Data Scraped and Stored in Mongo DB", status: 201});
+    })
     client.close();
   });
 })
