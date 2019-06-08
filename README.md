@@ -31,6 +31,3 @@ node server.js
 ## limitations
 
 1) for now connection to mongo db is opened and closed for each request which should be changed to a server session.
-×
-Drag and Drop
-The image will be downloaded by Fatkun
