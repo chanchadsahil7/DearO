@@ -5,11 +5,12 @@
   "main": "server.js",
   "author": "Scotch",
   "dependencies": {
-    "cheerio": "latest",
+    "cheerio": "^1.0.0-rc.3",
     "express": "latest",
     "mongodb": "^3.2.7",
     "monk": "^6.0.6",
     "python-shell": "^1.0.7",
-    "request": "latest"
+    "request": "^2.88.0",
+    "request-promise-native": "^1.0.7"
   }
 }

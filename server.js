@@ -2,7 +2,7 @@ const express = require('express');
 const app = express();
 const mongo = require('mongodb').MongoClient
 const url = 'mongodb://localhost:27017'
-import { getScrapedData } from './scrape.js'
+const { getScrapedData } = require('./scrape.js')
 
 /**
  * API to scrape the data from the given link
@@ -11,13 +11,14 @@ import { getScrapedData } from './scrape.js'
 app.get('/scrape', (req, res) => {
   // not a good practice to open a connection for each request.
   // TODO: Open the connection with db once the server kicks in.
-  mongo.connect(url, (err, client) => {
+  mongo.connect(url, async (err, client) => {
     if (err) {
       console.error(err)
       res.send({msg: "Cannot connect to db"});
     }
     // fetching the data from the output of the scrape script.
-    data = getScrapedData();
+    data = await getScrapedData();
+    console.log("in server", data);
 
     // Note: assumption the db and the collection exist.
     // connectiong to  `repo` db and collection `repoList`.
@@ -44,6 +45,8 @@ app.get('/search', (req, res) => {
   const desc = req.query.desc;
   const language = req.query.language;
 
+  console.log(typeof title);
+
   // not a good practice to open a connection for each request.
   // TODO: Open the connection with db once the server kicks in.
   mongo.connect(url, (err, client) => {
@@ -58,24 +61,25 @@ app.get('/search', (req, res) => {
     const query = {
       $or:[
         {
-          title:{$regex: title}
+          title:{$regex: `${title}`, $options: 'i'}
         },
         {
-          desc:{$regex: desc}
+          desc:{$regex: `${desc}`, $options: 'i'}
         },
         {
-          language:{$regex: language}
+          language:{$regex: `${language}`, $options: 'i'}
         }
       ]
     }
 
     // query the database and return the data.
-    collection.find(query, (err, data) => {
+    collection.find(query).toArray((err, data) => {
       if (err) {
         console.error(err);
         res.send({msg: "error in querying the data"});
       }
-      res.send({data: data, status: 200});
+      console.log(data);
+      res.send(JSON.stringify(data));
     });
   });
 })
