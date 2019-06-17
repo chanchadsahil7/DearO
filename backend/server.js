@@ -3,7 +3,9 @@ const app = express();
 const mongo = require('mongodb').MongoClient
 const url = 'mongodb://localhost:27017'
 const { getScrapedData } = require('./scrape.js')
+const cors = require('cors');
 
+app.use(cors());
 /**
  * API to scrape the data from the given link
  * and store it in the mongo db
@@ -45,8 +47,6 @@ app.get('/search', (req, res) => {
   const desc = req.query.desc;
   const language = req.query.language;
 
-  console.log(typeof title);
-
   // not a good practice to open a connection for each request.
   // TODO: Open the connection with db once the server kicks in.
   mongo.connect(url, (err, client) => {
@@ -79,7 +79,30 @@ app.get('/search', (req, res) => {
         res.send({msg: "error in querying the data"});
       }
       console.log(data);
-      res.send(JSON.stringify(data));
+      res.send(data);
+    });
+  });
+})
+
+app.get('/getData', (req, res) => {
+  // not a good practice to open a connection for each request.
+  // TODO: Open the connection with db once the server kicks in.
+  mongo.connect(url, (err, client) => {
+    if (err) {
+      console.error(err)
+      res.send({msg: "Cannot connect to db"});
+    }
+    const db = client.db('repo');
+    const collection = db.collection('repoList');
+
+    // query the database and return the data.
+    collection.find({}).toArray((err, data) => {
+      if (err) {
+        console.error(err);
+        res.send({msg: "error in querying the data"});
+      }
+      console.log(data);
+      res.send(data);
     });
   });
 })
