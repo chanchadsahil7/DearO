@@ -22,6 +22,7 @@ node server.js
 
 1) got to `localhost:8080`
 2) try scraping, filtering.
+3) Note: both the serves should run parallel in order to perform magic :p.
 
 ## APIs
 
